@@ -4,6 +4,7 @@
 # CGP类文件
 
 import numpy as np
+from sklearn.ensemble import RandomForestClassifier
 
 class CartesionMap:
 
@@ -13,7 +14,6 @@ class CartesionMap:
         self.n_input = n_input
 
     def generateIndividual(self):
-        size = self.n_row * self.n_col
         available_number = self.n_input
         individual = []
         for col in range(self.n_col):
@@ -22,7 +22,7 @@ class CartesionMap:
                                      second_number=np.random.randint(0, available_number),
                                      function=np.random.randint(0, 4),
                                      number=available_number + row)
-                while self.isValid(individual, node) == False:
+                while not self.isValid(individual, node):
                     node = CartesionNode(first_number=np.random.randint(0,available_number),
                                          second_number=np.random.randint(0,available_number),
                                          function=np.random.randint(0,4),
@@ -93,3 +93,20 @@ class CartesionNode:
                     return False
         else:
             return False
+
+
+class GA:
+
+    def __init__(self, pop_size, generation_size):
+        self.pop_size = pop_size
+        self.generation_size = generation_size
+
+    def generateFS(self, X, y, base_estimator=RandomForestClassifier(n_estimators=50)):
+        base_estimator.fit(X, y)
+        fs_importance = base_estimator.feature_importances_.tolist()
+        fs = []
+        for i in range(round(X.shape[1]/2)):
+            temp_index = fs_importance.index(max(fs_importance))
+            fs.append(temp_index)
+            fs_importance[temp_index] = 0
+        return fs
